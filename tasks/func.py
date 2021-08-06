@@ -1,5 +1,8 @@
-from os import listdir
-from os.path import join, splitext
+from subprocess import run
+
+import os
+from os import access
+from os.path import join, exists, isfile
 
 from invoke import task
 
@@ -29,93 +32,52 @@ def compile(ctx, user, func, clean=False, debug=False):
     _copy_built_function(user, func)
 
 
-@task()
-def upload1(ctx, host="localhost", port=8080):
-    func_file = "/home/kingdo/Desktop/stream_binary1"
-    url = "http://{}:{}/upload?c=0.5&m=256".format(host, port)
+# /register/functionName/concurrency/core/mem
+@task(default=True)
+def register(ctx, user, func, concurrency, core=0, mem=0):
+    """
+    Register function
+    """
+    # func_file = join(FUNC_BUILD_DIR, "lib{}.so".format(func))
+    func_file = join(FUNC_BUILD_DIR, user, ".".join([func, "wasm"]))
+    if not exists(func_file):
+        print("{} is not exist".format(func_file))
+        return
+    if not isfile(func_file):
+        print("{} is not file".format(func_file))
+        return
+    if not access(func_file, os.R_OK):
+        print("{} is nor readable".format(func_file))
+        return
+    if func == "hello1":
+        core = 0.5
+        mem = 128
+    url = "http://localhost:8080/register/{}/{}/{}/{}".format(func, concurrency, core, mem)
     response = requests.put(url, data=open(func_file, "rb"))
-
     print("Response {}: {}".format(response.status_code, response.text))
 
 
 @task()
-def upload(ctx, user, func, host="localhost", port=8002):
-    func_file = join(FUNC_BUILD_DIR, user, "{}.wasm".format(func))
-    url = "http://{}:{}/f/{}/{}".format(host, port, user, func)
-    response = requests.put(url, data=open(func_file, "rb"))
-
-    print("Response {}: {}".format(response.status_code, response.text))
-
-
-@task()
-def invoke(ctx, user, func, input_data=None, host="127.0.0.1", port=8080):
-    url = "http://{}:{}".format(host, port)
+def invoke(ctx, func):
+    url = "http://localhost:8080/invoke/{}".format(func)
     data = {
-        "function": func,
-        "user": user,
+        "name": "Kingdo"
     }
-
-    if input_data:
-        data["input_data"] = input_data
-
     response = requests.post(url, json=data)
-
     print("Response {}:\n{}".format(response.status_code, response.text))
 
 
 @task()
-def invoke_py(ctx, func="hello", input_data=None, host="127.0.0.1", port=8080):
-    url = "http://{}:{}".format(host, port)
-    data = {
-        "user": "python",
-        "function": "py_func",
-        "py_user": "python",
-        "py_func": func,
-        "py_entry": "faasm_main"
-    }
-
-    if input_data:
-        data["input_data"] = input_data
-
-    response = requests.post(url, json=data)
-
-    print("Response {}:\n{}".format(response.status_code, response.text))
+def hey(ctx, func, n, c):
+    url = "http://localhost:8080/invoke/{}".format(func)
+    cmd = "hey -n {} -c {} -m POST -t 0 -d ".format(n, c) + "\"{\"name\": \"Kingdo\"}\" " + url
+    print(cmd)
+    res = run(cmd, shell=True)
 
 
 @task()
-def flush(host="worker", port=8080):
-    url = "http://{}:{}".format(host, port)
-    data = {"type": "flush"}
-    response = requests.post(url, json=data)
-
-    print("Response {}: {}".format(response.status_code, response.text))
-
-
-@task
-def user(ctx, user, clean=False, debug=False):
-    """
-    Compile all functions belonging to the given user
-    """
-    # Build all funcs for this user (will fail if any builds fail)
-    target = "{}_all_funcs".format(user)
-    wasm_cmake(FUNC_DIR, FUNC_BUILD_DIR, target, clean, debug)
-
-    # Work out all the functions for this user (that we assume will have been
-    # built)
-    for func_file in listdir(join(FUNC_BUILD_DIR, user)):
-        name, ext = splitext(func_file)
-        if ext != ".wasm":
-            continue
-
-        _copy_built_function(user, name)
-
-
-@task
-def local(ctx, clean=False, debug=False):
-    """
-    Compile all functions used in the tests
-    """
-    user(ctx, "demo", clean, debug)
-    user(ctx, "errors", clean, debug)
-    user(ctx, "mpi", clean, debug)
-    user(ctx, "omp", clean, debug)
+def getRFT(ctx):
+    url = "http://localhost:8080/rft/info"
+    response = requests.get(url)
+    print("Response Code:{}".format(response.status_code))
+    print(response.text)

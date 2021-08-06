@@ -1,6 +1,6 @@
-#include <stdio.h>
+#include <rfit/rfit.h>
 
 int main() {
-    printf("hello wasm\n");
+    auto size = rfitGetInputSize();
     return 0;
 }

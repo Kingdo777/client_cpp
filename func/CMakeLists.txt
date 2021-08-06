@@ -16,10 +16,12 @@ message(STATUS "Detected wasm build (sysroot=${CMAKE_SYSROOT})")
 #
 # This max memory limit can stop benchmarks working so make sure it's big
 # and consider restricting in a more specific manner for certain functions.
+
 # -Xlinker --export=_faasm_zygote \
 SET(CMAKE_EXE_LINKER_FLAGS "
         -Xlinker --export=__heap_base \
         -Xlinker --export=__data_end \
+        -Xlinker --export-all \
         -Xlinker --export=__wasm_call_ctors \
         -Xlinker --max-memory=4294901760 \
         -Wl,-z,stack-size=4194304 -Wl, \
@@ -27,8 +29,7 @@ SET(CMAKE_EXE_LINKER_FLAGS "
 
 SET(CMAKE_EXECUTABLE_SUFFIX ".wasm")
 
-set(RFIT_FUNC_LIBS  c-printscan-long-double)
-#set(RFIT_FUNC_LIBS faasm c-printscan-long-double)
+set(RFIT_FUNC_LIBS rfit c-printscan-long-double)
 
 function(rfit_func func_name file_name)
     add_executable(${func_name} ${file_name})
