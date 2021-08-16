@@ -1,2 +1,7 @@
 __rfit_read_input
 __rfit_write_output
+__rfit_get_py_user
+__rfit_get_py_func
+__rfit_get_py_entry
+__rfit_conf_flag
+siprintf

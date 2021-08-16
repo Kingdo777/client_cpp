@@ -3,8 +3,10 @@ from multiprocessing import cpu_count
 
 PROJ_ROOT = dirname(dirname(abspath(__file__)))
 THIRD_PARTY_DIR = join(PROJ_ROOT, "third-party")
-WASM_DIR = "/home/kingdo/CLionProjects/client_cpp/runtime/wasm"
-RFIT_RUNTIME_ROOT = "/home/kingdo/CLionProjects/client_cpp/runtime/runtime_root"
+WASM_DIR = join(PROJ_ROOT, "runtime", "wasm")
+# RFIT_RUNTIME_ROOT = join(PROJ_ROOT, "runtime", "runtime_root")
+RFIT_RUNTIME_ROOT = "/home/kingdo/CLionProjects/RFIT/Function/wasm/runtime_root"
+CROSSENV_DIR = join(PROJ_ROOT, "cross_venv", "cross")
 
 # Environment
 USABLE_CPUS = int(cpu_count()) - 1

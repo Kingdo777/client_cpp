@@ -18,10 +18,13 @@ message(STATUS "Detected wasm build (sysroot=${CMAKE_SYSROOT})")
 # and consider restricting in a more specific manner for certain functions.
 
 # -Xlinker --export=_faasm_zygote \
+# -Xlinker --export-all \
+# -Xlinker --export=rfit_ping_func \
 SET(CMAKE_EXE_LINKER_FLAGS "
         -Xlinker --export=__heap_base \
         -Xlinker --export=__data_end \
-        -Xlinker --export-all \
+         -Xlinker --export-all \
+          -Xlinker --export=_rfit_zygote \
         -Xlinker --export=__wasm_call_ctors \
         -Xlinker --max-memory=4294901760 \
         -Wl,-z,stack-size=4194304 -Wl, \
@@ -50,3 +53,4 @@ function(rfit_dynamic_func func_name file_name)
 endfunction(rfit_dynamic_func)
 
 add_subdirectory(demo)
+add_subdirectory(python)

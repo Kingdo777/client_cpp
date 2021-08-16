@@ -9,10 +9,14 @@ set(PUBLIC_HEADERS
         include/core.h
         include/host_interface.h
         include/rfit.h
+        include/emscripten.h
         )
 
 set(LIB_FILES
         core.cpp
+        zygote.cpp
+        ping.cpp
+        emscripten.c
         )
 
 
